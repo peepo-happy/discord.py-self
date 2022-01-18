@@ -1993,5 +1993,6 @@ class HTTPClient:
         payload = {"permissions":"0","authorize":True}
 
         uri = utils.oauth_url(client_id=client_id,redirect_uri=redirect_uri,scopes=scope)
-
-        return self.request(Route('POST', path=uri), json=payload)
+        sliced_uri = uri[19:]
+        route = Route('POST',path=sliced_uri)
+        return self.request(route, json=payload)
