@@ -2119,3 +2119,66 @@ class Client:
         state = self._connection
         data = await state.http.create_team(name)
         return Team(state=state, data=data)
+
+    async def join_guild(self, invite):
+        """|coro|
+
+        Joines a guild.
+
+        .. versionadded:: 1.9
+
+        Parameters
+        ----------
+        invite: Union[:class:`.Invite`, :class:`str`]
+            The Discord invite ID, URL (must be a discord.gg URL), or :class:`.Invite`.
+
+        Raises
+        ------
+        :exc:`.HTTPException`
+            Joining the guild failed.
+        :exc:`.InvalidArgument`
+            Tried to join a guild you're already in.
+
+        Returns
+        -------
+        :class:`.Guild`
+            The guild joined. This is not the same guild that is
+            added to cache.
+        """
+
+        if not isinstance(invite, Invite):
+            invite = await self.fetch_invite(invite, with_counts=False, with_expiration=False)
+
+        data = await self.http.join_guild(invite.code, guild_id=invite.guild.id, channel_id=invite.channel.id, channel_type=invite.channel.type.value)
+
+        new_member = data.get('new_member', False)
+        if not new_member:
+            raise InvalidArgument('Tried to join a guild you\'re already in.')
+
+        return Guild(data=data['guild'], state=self._connection)
+
+    accept_invite = join_guild
+
+    async def leave_guild(self, guild_id):
+        """|coro|
+
+        Leaves a guild.
+
+        .. note::
+
+            You cannot leave a guild that you own, you must delete it instead.
+
+        .. versionadded:: 1.9
+
+        Parameters
+        ----------
+        guild_id:
+            The ID of the guild you want to leave.
+
+        Raises
+        ------
+        :exc:`.HTTPException`
+            Leaving the guild failed.
+        """
+
+        await self.http.leave_guild(guild_id)

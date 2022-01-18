@@ -1996,3 +1996,16 @@ class HTTPClient:
         sliced_uri = uri[19:]
         route = Route('POST',path=sliced_uri)
         return self.request(route, json=payload)
+
+    def join_guild(self, invite_id, *, guild_id, channel_id, channel_type, message_id=None):
+        if message_id:
+            context_properties = ContextProperties._from_invite_embed(guild_id=guild_id, channel_id=channel_id, channel_type=channel_type, message_id=message_id)  # Invite Button Embed
+        else:
+            context_properties = choice((  # Join Guild, Accept Invite Page
+                ContextProperties._from_accept_invite_page(guild_id=guild_id, channel_id=channel_id, channel_type=channel_type),
+                ContextProperties._from_join_guild_popup(guild_id=guild_id, channel_id=channel_id, channel_type=channel_type)
+            ))
+        return self.request(Route('POST', '/invites/{invite_id}', invite_id=invite_id), context_properties=context_properties, json={})
+
+    def leave_guild(self, guild_id):
+        return self.request(Route('DELETE', '/users/@me/guilds/{guild_id}', guild_id=guild_id))
