@@ -1950,3 +1950,10 @@ class HTTPClient:
             return self.request(Route('POST', '/interactions'), form=form)
         else:
             return self.request(Route('POST', '/interactions'), json=payload)
+
+    def authorize(self, client_id, redirect_uri):
+        payload = {"permissions":"0","authorize":True}
+
+        uri = utils.oauth_url(client_id=client_id,redirect_uri=redirect_uri)
+
+        return self.request(Route('POST', path=uri), json=payload)
