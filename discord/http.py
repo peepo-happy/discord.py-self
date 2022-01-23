@@ -29,6 +29,7 @@ from base64 import b64encode
 import json
 import logging
 from random import choice
+from datetime import datetime
 from typing import (
     Any,
     ClassVar,
@@ -2047,17 +2048,18 @@ class HTTPClient:
             if command["name"] == command_name:
                 command_payload = command
 
-        application_id_json = f'{command_payload["application_id"]}'
-        version_data_json = f'{command_payload["version"]}'
-        id_data_json = f'{command_payload["id"]}'
-        name_data_json = f"{command_name}"
+        application_id_json = str(command_payload["application_id"])
+        version_data_json = str(command_payload["version"])
+        id_data_json = str(command_payload["id"])
+        name_data_json = str(command_name)
+        nonce = str(utils.time_snowflake(datetime.utcnow()))
 
-        json_payload = json.dumps({
+        json_dump = json.dumps({
             'type': 2,
             'application_id': application_id_json,
-            'guild_id': f"{guild_id}",
-            'channel_id': f"{channel_id}",
-            'session_id': f"{session_id}",
+            'guild_id': str(guild_id),
+            'channel_id': str(channel_id),
+            'session_id': str(session_id),
             'data': {
                 'version': version_data_json,
                 'id': id_data_json,
@@ -2068,7 +2070,7 @@ class HTTPClient:
                     'name': name_data_json,
                     'application_id': application_id_json,
                     'type': command_payload["type"],
-                    'description': f'{command_payload["description"]}',
+                    'description': str(command_payload["description"]),
                     'default_permissions': command_payload["default_permission"],
                     'dm_permissions': command_payload["dm_permission"],
                     'name_localized': name_data_json,
@@ -2076,13 +2078,15 @@ class HTTPClient:
                     'permissions': [],
                     'options': [{
                         'type': command_payload["options"][0]["type"],
-                        'name': f'{command_payload["options"][0]["name"]}',
-                        'description': f'{command_payload["options"][0]["description"]}'
+                        'name': str(command_payload["options"][0]["name"]),
+                        'description': str(command_payload["options"][0]["description"])
                     }]
                 }
-            }
-            # "nonce": "934815790337622016"
+            },
+            "nonce": nonce
         }, separators=(',', ':'))
+
+        json_payload = json.loads(json_dump)
 
         return json_payload
 
