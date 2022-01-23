@@ -1979,8 +1979,26 @@ class HTTPClient:
 
         return self.request(Route('POST', '/report'), json=payload)
 
-    def get_application_commands(self, id):
-        return self.request(Route('GET', '/applications/{user_id}/commands', user_id=id))
+    # def get_application_commands(self, id):
+    #     return self.request(Route('GET', '/applications/{user_id}/commands', user_id=id))
+
+    async def get_application_commands(
+            self, application_id: Union[int, Snowflake], guild_id: Optional[int] = None
+    ) -> List[dict]:
+        """
+        Get all application commands from an application
+        :param application_id: Application ID snowflake
+        :param guild_id: Guild to get commands from, if specified. Defaults to global (None)
+        :return: A list of Application commands.
+        """
+        application_id = int(application_id)
+
+        if guild_id in (None, "None"):
+            return await self.request(Route("GET", f"/applications/{application_id}/commands"))
+        else:
+            return await self.request(
+                Route("GET", f"/applications/{application_id}/guilds/{guild_id}/commands")
+            )
 
     def interact(self, payload, *, form_data=False) -> Response[None]:
         if form_data:
