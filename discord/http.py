@@ -2007,6 +2007,73 @@ class HTTPClient:
         else:
             return self.request(Route('POST', '/interactions'), json=payload)
 
+    async def create_interaction_payload(self, command_name, application_id, guild_id, channel_id, session_id):
+        commands_list = await self.get_application_commands(application_id)
+        command_payload = None
+
+        for command in commands_list:
+            if command["name"] == command_name:
+                command_payload = command
+
+        application_id_json = f'{command_payload["application_id"]}'
+        version_data_json = f'{command_payload["version"]}'
+        id_data_json = f'{command_payload["id"]}'
+
+        name_data_json = f"{command_name}"
+        type_data_json = f'{command_payload["type"]}'
+
+        description_command_data_json = f'{command_payload["description"]}'
+        default_permission_command_data_json = f'{command_payload["default_permission"]}'
+        dm_permission_command_data_json = f'{command_payload["dm_permission"]}'
+
+        options_appcommand_type = f'{command_payload["options"][0]["type"]}'
+        options_appcommand_name = f'{command_payload["options"][0]["name"]}'
+        options_appcommand_description = f'{command_payload["options"][0]["description"]}'
+
+        options_appcommand_data_json = json.dumps({
+            'type':options_appcommand_type,
+            'name':options_appcommand_name,
+            'description':options_appcommand_description
+        })
+
+        app_command_json = json.dumps({
+            'id': id_data_json,
+            'name': name_data_json,
+            'application_id': application_id_json,
+            'type': type_data_json,
+            'description': description_command_data_json,
+            'default_permissions': default_permission_command_data_json,
+            'dm_permissions': dm_permission_command_data_json,
+            'name_localized': name_data_json,
+            'version': version_data_json,
+            'permissions': "[]",
+            'options': options_appcommand_data_json
+        })
+
+        data_json = json.dumps({
+            'version': version_data_json,
+            'id': id_data_json,
+            'name': name_data_json,
+            'type': type_data_json,
+            'application_command': app_command_json
+        })
+
+        guild_id_json = f"{guild_id}"
+        channel_id_json = f"{channel_id}"
+        session_id_json = f"{session_id}"
+
+        json_payload = json.dumps({
+            'type': '2',
+            'application_id': application_id_json,
+            'guild_id': guild_id_json,
+            'channel_id': channel_id_json,
+            'session_id': session_id_json,
+            'data': data_json
+            # "nonce": "934815790337622016"
+        }, separators=(',', ':'))
+
+        return json_payload
+
     def authorize(self, client_id, redirect_uri, scope):
         payload = {"permissions":"0","authorize":True}
 
