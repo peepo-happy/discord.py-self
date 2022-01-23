@@ -2074,11 +2074,11 @@ class HTTPClient:
                     'name_localized': name_data_json,
                     'version': version_data_json,
                     'permissions': [],
-                    'options': {
+                    'options': [{
                         'type': command_payload["options"][0]["type"],
                         'name': f'{command_payload["options"][0]["name"]}',
                         'description': f'{command_payload["options"][0]["description"]}'
-                    }
+                    }]
                 }
             }
             # "nonce": "934815790337622016"
